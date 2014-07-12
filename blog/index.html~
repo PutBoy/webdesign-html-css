@@ -7,17 +7,14 @@
   <div id="logo">
     LOGO
   </div>
-  <tr>  
-    <td id="blog-post">
-      <div style="text-align:left; width:65%">
-        HEJ
-      </div>
-    </td>
-    <td id="sidebar">
-      <div style="text-align:right; width:25%">
-        HEJ
-      </div>
-    </td>
-  </tr>
+  <div id="main">
+    <div id="blogpost"> 
+      HEJ
+    </div>
+    <div id="sidebar"> 
+      HEJ
+    </div>
+  </div>
 </body>
+
 
