@@ -1,21 +1,27 @@
-<DOCTYPE html>
-<head>
-  <script src="scripts/csi.js/csi.min.js"></script>
-  <meta charset="utf-8"/>
-  <title>Sebastian's Programming</title>
-</head>
-<body>
-  <div id="logo">
-    LOGO
-  </div>
-  <div id="main">
-    <div id="blogpost" style="float:left"> 
-      <div data-include="most-recent-post.html"></div>
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="scripts/jquery.js"></script>
+    <meta charset="utf-8"/>
+    <title>Sebastian's Programming</title>
+    <script>
+      $(function()
+      {
+        $("#blogpost").load("blogposts/ecs.html");
+      });
+    </script>
+  </head>
+  <body>
+    <div id="logo">
+      LOGO
     </div>
-    <div id="sidebar" style="float:right"> 
-      HEJ
+    <div id="main">
+      <div id="blogpost"> 
+      </div>
+      <div id="sidebar" style="float:right"> 
+        HEJ
+      </div>
     </div>
-  </div>
-</body>
-
+  </body>
+</html>
 
