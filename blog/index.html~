@@ -1,0 +1,23 @@
+<DOCTYPE html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Sebastian's Programming</title>
+</head>
+<body>
+  <div id="logo">
+    LOGO
+  </div>
+  <tr>  
+    <td id="blog-post">
+      <div style="text-align:left; width:65%">
+        HEJ
+      </div>
+    </td>
+    <td id="sidebar">
+      <div style="text-align:right; width:25%">
+        HEJ
+      </div>
+    </td>
+  </tr>
+</body>
+
