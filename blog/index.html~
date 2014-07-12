@@ -16,8 +16,8 @@
       LOGO
     </div>
     <div id="main">
-      <div id="blogpost-container" style="float:left;width:60%">
-        <div id="blogpost"> 
+      <div id="blogpost-container" style="width:60%">
+        <div id="blogpost" style="float:left"> 
         </div>
       </div>  
       <div id="sidebar" style="float:right; width:40%"> 
