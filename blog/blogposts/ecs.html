@@ -7,40 +7,42 @@ Preface: I am a member of a team of game developers that are currently working o
 Using inheritance for game objects is conventional and appears the natural thing to do. In particular it is easy to see how it can be implemented, for example:
 </p>
 <p>
-  <ul style="list-style-type:none">
-    <li>Object
-      <ul style="list-style-type:none">
-        <li>Player</li>
-        <li>Enemy
-          <ul style="list-style-type:none">
-            <li>Spider</li>
-            <li>Undead
-              <ul style="list-style-type:none">
-                <li>Archer</li>
-                <li>Swordsman</li>
-              </ul> 
-            </li>
-          </ul>
-        </li>
-        <li>Spell
-          <ul style="list-style-type:none">
-            <li>Attack
-              <ul style="list-style-type:none"> 
-                <li>Fireball</li> 
-                <li>Ice Blast</li>
-              </ul>
-            </li>
-            <li>Defend
-              <ul style="list-style-type:none">
-                <li>Heal</li>
-                <li>Shield</li>
-              </ul>
-            </li>
-          </ul>
-        </li>
-      </ul> 
-    </li>
-  </ul> 
+  <table>
+    <ul style="list-style-type:none">
+      <li>Object
+        <ul style="list-style-type:none">
+          <li>Player</li>
+          <li>Enemy
+            <ul style="list-style-type:none">
+              <li>Spider</li>
+              <li>Undead
+                <ul style="list-style-type:none">
+                  <li>Archer</li>
+                  <li>Swordsman</li>
+                </ul> 
+              </li>
+            </ul>
+          </li>
+          <li>Spell
+            <ul style="list-style-type:none">
+              <li>Attack
+                <ul style="list-style-type:none"> 
+                  <li>Fireball</li> 
+                  <li>Ice Blast</li>
+                </ul>
+              </li>
+              <li>Defend
+                <ul style="list-style-type:none">
+                  <li>Heal</li>
+                  <li>Shield</li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+        </ul> 
+      </li>
+    </ul> 
+  </table>
 </p>
 <p>
 It is very easy to see the advantages of this, it looks logical and seems to be maintainable. After all, it follows what most learn are the best-practices of object oriented design, and it allows for more advanced patterns, like for example <a href="http://en.wikipedia.org/wiki/Decorator_pattern" alt="">Decorator</a>. One problem with it however, of which there are several, is that it quickly turns into an unmaintainable mess, for two main reasons:
@@ -55,15 +57,17 @@ The other problem is that more often than not we start having to migrate code up
 What we really want to do is compose objects instead. What this means is that instead of saying what an object is, we say what an object has and/or what it can do. One approach is a simple component based scheme with one class that is composed of different types of components during runtime. This scheme might look like this:
 </p>
 <p>
-  <ul style="list-style-type:none">
-    <li>Object
-      <ul style="list-style-type:none">
-        <li>(has) AIComponent</li>
-        <li>(has) UpdateComponent</li>
-        <li>(has) RenderComponent</li>
-      </ul>
-    </li>
-  </ul>
+  <table>
+    <ul style="list-style-type:none">
+      <li>Object
+        <ul style="list-style-type:none">
+          <li>(has) AIComponent</li>
+          <li>(has) UpdateComponent</li>
+          <li>(has) RenderComponent</li>
+        </ul>
+      </li>
+    </ul>
+  </table>
 </p> 
 <p>
 So the object has these components, which define data and behaviours. The object will also need some data itself, that all the components may use, such as position and rotation, but most data will be inside one of the components (the RenderComponent may have a sprite, and the AIComponent may have a state machine, for example). The different components will only care about one thing, for example the RenderComponent only cares about rendering the object. Those who are familiar with design patterns will realize that this is an implementation of the <a href="http://en.wikipedia.org/wiki/Strategy_pattern" alt="">Strategy pattern</a>. 
@@ -71,14 +75,18 @@ So the object has these components, which define data and behaviours. The object
 <p>
 To achieve this all components implement an abstract method: Update or Do (or something similar). While this does also make use of inheritance it promotes a much flatter hierarchy, for example the AIComponent hierarchy may look something like this:
 </p>
-<ul style="list-style-type:none">
-  <li>AIComponent
-    <ul style="list-style-type:none">
-     <li>AggressiveAI</li>
-     <li>PassiveAI</li>
-   </ul>
- </li>
-</ul>  
+
+<table>
+  <ul style="list-style-type:none">
+    <li>AIComponent
+      <ul style="list-style-type:none">
+       <li>AggressiveAI</li>
+       <li>PassiveAI</li>
+     </ul>
+   </li>
+  </ul>  
+</table>
+
 <p>
 Notice that suddenly we have stopped talking about classes of game objects. All an object is is a unique composition of components and data (or settings) for those components. Classes, or types, of game objects stop being a construction of the language and starts being something closer to what we want them to be: an abstract and arbitrary category. In addition to flattening our hierarchy we have also made it easier for non-programmers to add new types of objects, as long as they are familiar with what the data means all they have to do is compose objects using the components they need and supply initial data. This can easily be achieved using some serialization format, like JSON or XML, and using <a href="http://en.wikipedia.org/wiki/Factory_object" alt="">Factory methods</a>. In such a way every type of object is just an entry in a JSON-document (for example) and can be initiated completly from that.
 </p>
@@ -98,13 +106,15 @@ Also called Entity System, the pattern, in addition to being component based, se
 <p>
 There are also components. Components contain data, and only data (although it is a good idea to cheat a little bit and also give them serilization logic). A component belongs to an entity, but it doesn't have to know that. To glue components and entities together there is usually an EntityManager-class, which keep track of all components and knows which entities has which components (in terms of objects). To make this idea less abstract, here is a list of possible components:
 
-<ul>
-  <li>Transform (holds position and rotation)</li>
-  <li>Movement (holds velocity and possibly acceleration)</li>
-  <li>Mesh (holds mesh information for rendering)</li>
-  <li>Inventory (holds inventory slots for items in the game)</li>
-  <li>...</li>
-</ul>
+<table>
+  <ul>
+    <li>Transform (holds position and rotation)</li>
+    <li>Movement (holds velocity and possibly acceleration)</li>
+    <li>Mesh (holds mesh information for rendering)</li>
+    <li>Inventory (holds inventory slots for items in the game)</li>
+    <li>...</li>
+  </ul>
+</table>
 
 An entity may have any number of components (but not more than one of each type), and arguably may have no components at all. Each type of component has an ID as well, we call them FamilyID to separate it from the ID of the entities. These IDs start at 0 and component classes are awarded IDs incrementally. These ID's are used as entries for the pins and tumblers for the keys and locks, implemented as bit fields.
 </p>
@@ -114,11 +124,13 @@ Lastly, there are systems. A system is simply a function that does some work on 
 <p>
 Consider these components:
 
-<ul>
-  <li>Transform</li>
-  <li>Movement</li>
-  <li>Sprite</li>
-</ul>
+<table>
+  <ul>
+    <li>Transform</li>
+    <li>Movement</li>
+    <li>Sprite</li>
+  </ul>
+</table>
 
 Furthermore consider that we have 4 entities that have all of these components. They may be players in a game of tag. We also have some number of entities which only have a Transform and a Sprite. These are the entities which makes up the map, they may be trees or buildings, if we are playing our game of tag outdoors.
 </p>
