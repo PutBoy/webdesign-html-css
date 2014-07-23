@@ -1,0 +1,154 @@
+<h1>Entity Component System</h1>
+<p>
+Preface: I am a member of a team of game developers that are currently working on a game called <a href="http://tarheadstudio.com/">Ruin</a>. In developing that game we have settled on a component based design, we use Entity Component System for for game objects. In this blog post I will discuss component based design in general, ECS in particular and also talk about my experiences with that design.
+</p>
+<p>
+<h2>Component Based Design</h2>
+Using inheritance for game objects is conventional and appears the natural thing to do. In particular it is easy to see how it can be implemented, for example:
+</p>
+<p>
+  <table>
+    <ul style="list-style-type:none">
+      <li>Object
+        <ul style="list-style-type:none">
+          <li>Player</li>
+          <li>Enemy
+            <ul style="list-style-type:none">
+              <li>Spider</li>
+              <li>Undead
+                <ul style="list-style-type:none">
+                  <li>Archer</li>
+                  <li>Swordsman</li>
+                </ul> 
+              </li>
+            </ul>
+          </li>
+          <li>Spell
+            <ul style="list-style-type:none">
+              <li>Attack
+                <ul style="list-style-type:none"> 
+                  <li>Fireball</li> 
+                  <li>Ice Blast</li>
+                </ul>
+              </li>
+              <li>Defend
+                <ul style="list-style-type:none">
+                  <li>Heal</li>
+                  <li>Shield</li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+        </ul> 
+      </li>
+    </ul> 
+  </table>
+</p>
+<p>
+It is very easy to see the advantages of this, it looks logical and seems to be maintainable. After all, it follows what most learn are the best-practices of object oriented design, and it allows for more advanced patterns, like for example <a href="http://en.wikipedia.org/wiki/Decorator_pattern" alt="">Decorator</a>. One problem with it however, of which there are several, is that it quickly turns into an unmaintainable mess, for two main reasons:
+</p>
+<p>
+What if we want to add an undead spider as a enemy? Does that enemy inherit from the Spider class or the Undead class? This seems an arbitrary choice, clearly the answer is that it could inherit from either of those classes. However, whichever class we shoose we will probably end up having to reuse code from the other class. But code reuse was what we wanted to avoid when deciding upon iheritance in the first place! The problem arises because objects or things in the real world rarely fit neatly into one category (or are abjects at all, which is another discussion entirerly).
+</p>
+<p>
+The other problem is that more often than not we start having to migrate code upwards in the hierarchy; a feature that used to only be used by one class suddently is needed in another class, so this feature starts to migrate, leaving a dirty trail of code duplication in its wake, until we realize we should place it in node in the hierarchy reachable from all classes that use it. This often leads to an overbloated base class with code that is only used by a handful of subclasses, eventually turning a once purely abstract class into a God class.
+</p>
+<p>
+What we really want to do is compose objects instead. What this means is that instead of saying what an object is, we say what an object has and/or what it can do. One approach is a simple component based scheme with one class that is composed of different types of components during runtime. This scheme might look like this:
+</p>
+<p>
+  <table>
+    <ul style="list-style-type:none">
+      <li>Object
+        <ul style="list-style-type:none">
+          <li>(has) AIComponent</li>
+          <li>(has) UpdateComponent</li>
+          <li>(has) RenderComponent</li>
+        </ul>
+      </li>
+    </ul>
+  </table>
+</p> 
+<p>
+So the object has these components, which define data and behaviours. The object will also need some data itself, that all the components may use, such as position and rotation, but most data will be inside one of the components (the RenderComponent may have a sprite, and the AIComponent may have a state machine, for example). The different components will only care about one thing, for example the RenderComponent only cares about rendering the object. Those who are familiar with design patterns will realize that this is an implementation of the <a href="http://en.wikipedia.org/wiki/Strategy_pattern" alt="">Strategy pattern</a>. 
+</p>
+<p>
+To achieve this all components implement an abstract method: Update or Do (or something similar). While this does also make use of inheritance it promotes a much flatter hierarchy, for example the AIComponent hierarchy may look something like this:
+</p>
+
+<table>
+  <ul style="list-style-type:none">
+    <li>AIComponent
+      <ul style="list-style-type:none">
+       <li>AggressiveAI</li>
+       <li>PassiveAI</li>
+     </ul>
+   </li>
+  </ul>  
+</table>
+
+<p>
+Notice that suddenly we have stopped talking about classes of game objects. All an object is is a unique composition of components and data (or settings) for those components. Classes, or types, of game objects stop being a construction of the language and starts being something closer to what we want them to be: an abstract and arbitrary category. In addition to flattening our hierarchy we have also made it easier for non-programmers to add new types of objects, as long as they are familiar with what the data means all they have to do is compose objects using the components they need and supply initial data. This can easily be achieved using some serialization format, like JSON or XML, and using <a href="http://en.wikipedia.org/wiki/Factory_object" alt="">Factory methods</a>. In such a way every type of object is just an entry in a JSON-document (for example) and can be initiated completly from that.
+</p>
+<p>
+There are also other advantages. It is extremely flexible, in my experience. More techinically though, it can be made extremely cache friendly, and is open to extreme cache optimizations that can be achieved fairly simply when using a language that supports it, C/C++ for example (see http://gameprogrammingpatterns.com/data-locality.html). Sadly, this is virtually impossible to achieve in Java (one has to trust the garbage collector completely) and requires what is effectively dark magic in C# (if you don't want to trust its garbage collector).
+</p>
+<p>
+We can of course do better still. The Unity3D engine implements a component based approach which lets you add an arbitrary number of components to an object. In that implementation the prefab takes the place of the class.
+</p>
+<p>
+We can do better still though.
+</p>
+<h2>Enter Entity Component System</h2>
+<p>
+Also called Entity System, the pattern, in addition to being component based, separates an object's data and functionality(even the entity itself is separated from the object). While there are many ways of implementing the patterns, the basic principles are the same. In this post I am simply outlining the implementation used in Ruin. Under the pattern an object is an entity, and all an entity is is an ID and a key. The ID uniquely identifies the object, the key is used to unlock systems (which will we come to). 
+</p>
+<p>
+There are also components. Components contain data, and only data (although it is a good idea to cheat a little bit and also give them serilization logic). A component belongs to an entity, but it doesn't have to know that. To glue components and entities together there is usually an EntityManager-class, which keep track of all components and knows which entities has which components (in terms of objects). To make this idea less abstract, here is a list of possible components:
+
+<table>
+  <ul>
+    <li>Transform (holds position and rotation)</li>
+    <li>Movement (holds velocity and possibly acceleration)</li>
+    <li>Mesh (holds mesh information for rendering)</li>
+    <li>Inventory (holds inventory slots for items in the game)</li>
+    <li>...</li>
+  </ul>
+</table>
+
+An entity may have any number of components (but not more than one of each type), and arguably may have no components at all. Each type of component has an ID as well, we call them FamilyID to separate it from the ID of the entities. These IDs start at 0 and component classes are awarded IDs incrementally. These ID's are used as entries for the pins and tumblers for the keys and locks, implemented as bit fields.
+</p>
+<p>
+Lastly, there are systems. A system is simply a function that does some work on a set of component types each update in the game loop. A system has a lock, and each update it will try the key of each entity and the components whose entity whose key fits their look will be updated. A key is considered to fit a lock if it contains all components in the lock (but may contain others). The simple example is that of movement.
+</p>
+<p>
+Consider these components:
+
+<table>
+  <ul>
+    <li>Transform</li>
+    <li>Movement</li>
+    <li>Sprite</li>
+  </ul>
+</table>
+
+Furthermore consider that we have 4 entities that have all of these components. They may be players in a game of tag. We also have some number of entities which only have a Transform and a Sprite. These are the entities which makes up the map, they may be trees or buildings, if we are playing our game of tag outdoors.
+</p>
+<p>
+A system, <i>Movement</i>, is responsible for updating the position of each Transform by the velocity of each Movement. So each update it searches for entities that have both a Transform and a Movement, then performing the operation on those components. Since only the players have both a Transform and a Movement, the trees stay still.
+</p>
+<p>
+Flexibility is achieved using this pattern when the components and systems are sufficiently small. The designer must constantly remind himself that the systems should do only one thing, and do that thing well, while components should only represent one thing. The rule of thumb used for the design in Ruin is that components should only contain 1-3 fields, while a system's code should fit on a single screen. This is hard to achieve in practice, but if it's not achieved it typically means offending systems or components could be separated into two. This should obviously, as everything, not be followed just because, but are good guide lines in my experience
+</p>
+<p>
+An advantage of this is testability. Because each system only does on thing and because it is easy to mock entities, by just adding necessary components to it, systems are, at least in theory, straight forward to test. Because the different parts of the architecture is so separate it is also easy to trace bugs (for some definition of easy). Adding functionality by adding more systems doesn't affect other systems directly it is, sometimes, easy to see from which system a bug orgininated. At least it's easier than scanning that 1000-lined <i>player.cpp</i>.
+</p>
+<p>
+Concurrency can also be achieved. Because two systems with incompatible locks (where no pins are the same) are not reading or writing to the same components, these can be run concurrently. Of course, there may be data races elsewhere. Disjoint sets can be used to find systems with incompatible locks.
+</p>
+<p>
+There are of course disadvantages. For example it's not easily adapted to event driven systems. A way to circumvent this is by using using signals or messages between systems, or using <a href="http://en.wikipedia.org/wiki/Observer_pattern" alt="">the Observer pattern</a>. It can also be costly to iterate through entities for large number of entities and systems. This can be mitigated by spatial partion.
+</p>
+<p>
+One reason that we chose to work with ECS in Ruin is because the pattern is heavily data driven. Objects are less defined by their behaviour than by their data. A central theme in Ruin are the abilities, and this pattern allows us to create and add abilities much more easily.
+</p>
